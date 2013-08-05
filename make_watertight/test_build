@@ -1,0 +1,36 @@
+
+
+STORE=$LD_LIBRARY_PATH
+
+LD_LIBRARY_PATH=/filespace/people/s/shriwise/make_watertight_test_suite/cubits/10.2/bin
+
+./check_watertight ~/make_watertight_test_suite/cubits/10.2/dagmc_preproc_out.h5m
+./make_watertight ~/make_watertight_test_suite/cubits/10.2/dagmc_preproc_out.h5m
+./check_watertight ~/make_watertight_test_suite/cubits/10.2/dagmc_preproc_out.h5m
+
+LD_LIBRARY_PATH=/filespace/people/s/shriwise/make_watertight_test_suite/cubits/12/bin
+
+./check_watertight ~/make_watertight_test_suite/cubits/12/dagmc_preproc_out.h5m
+./make_watertight ~/make_watertight_test_suite/cubits/12/dagmc_preproc_out.h5m
+./check_watertight ~/make_watertight_test_suite/cubits/12/dagmc_preproc_out.h5m
+
+LD_LIBRARY_PATH=/filespace/people/s/shriwise/make_watertight_test_suite/cubits/12.2/bin
+
+./check_watertight ~/make_watertight_test_suite/cubits/12.2/dagmc_preproc_out.h5m
+./make_watertight ~/make_watertight_test_suite/cubits/12.2/dagmc_preproc_out.h5m
+./check_watertight ~/make_watertight_test_suite/cubits/12.2/dagmc_preproc_out.h5m
+
+LD_LIBRARY_PATH=/filespace/people/s/shriwise/make_watertight_test_suite/cubits/13/bin
+
+./check_watertight ~/make_watertight_test_suite/cubits/13/dagmc_preproc_out.h5m
+./make_watertight ~/make_watertight_test_suite/cubits/13/dagmc_preproc_out.h5m
+./check_watertight ~/make_watertight_test_suite/cubits/13/dagmc_preproc_out.h5m
+
+LD_LIBRARY_PATH=/filespace/people/s/shriwise/make_watertight_test_suite/cubits/13.1/bin
+
+./check_watertight ~/make_watertight_test_suite/cubits/13.1/dagmc_preproc_out.h5m
+./make_watertight ~/make_watertight_test_suite/cubits/13.1/dagmc_preproc_out.h5m
+./check_watertight ~/make_watertight_test_suite/cubits/13.1/dagmc_preproc_out.h5m
+
+
+LD_LIBRARY_PATH=$STORE
