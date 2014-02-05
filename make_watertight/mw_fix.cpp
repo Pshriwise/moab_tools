@@ -611,6 +611,42 @@ MBErrorCode get_senses(MBEntityHandle entity,
      j++;
 
    }
+
+    //Add groups//
+    
+    MBTag name_tag;
+    result = MBI()->tag_get_handle( NAME_TAG_NAME, NAME_TAG_SIZE,
+				MB_TYPE_OPAQUE, name_tag, moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
+    if ( result != MB_SUCCESS )
+      {
+	moab_printer(result);
+      }
+    if(gen::error(MB_SUCCESS!=result,"could not get the name tag handle")) return result;    
+    
+    MBTag category_tag;
+    result = MBI()->tag_get_handle( CATEGORY_TAG_NAME, CATEGORY_TAG_SIZE,
+				    MB_TYPE_OPAQUE, category_tag, moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
+    if ( result != MB_SUCCESS )
+      {
+	moab_printer(result);
+      }
+    if(gen::error(MB_SUCCESS!=result,"could not get the name category tag handle")) return result;    
+
+    MBRange group_sets;
+    char name[] = "Group\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
+    void* val[] = {&name};
+    std::cout << "Size of name = " << sizeof(name) << std::endl;
+    rval = MBI()->get_entities_by_type_and_tag( 0, MBENTITYSET, &category_tag, val, 1, group_sets );
+    if(gen::error(MB_SUCCESS!=result,"could not get the group entities")) return result;
+    group_sets.print();
+
+    //print name tag of group_set 1
+    char* group_names[3];
+    rval = MBI()-> tag_get_data( name_tag, group_sets, group_names);
+    if(gen::error(MB_SUCCESS!=result,"could not get the group names")) return result;
+
+    //std::cout << "Group Name 1 = " << *group_names[0] << std::endl;
+
 }
 //==========EOL=============//
 
