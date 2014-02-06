@@ -575,7 +575,7 @@ MBErrorCode get_senses(MBEntityHandle entity,
     std::cout << "Number of senses for surface " << gen::geom_id_by_handle(surf) << " = " << surf_senses.size() << std::endl;
     for (unsigned int index=0; index<surf_senses.size() ; index++)
     { 
-     std::cout << "vol = " << gen::geom_id_by_handle(vols[index]) << std::endl;
+     std::cout << "vol = " << gen::geom_id_by_handle( vols[index] ) << std::endl;
      std::cout << "sense = " << sense_printer( surf_senses[index] ) << std::endl;
     }
     std::cout << std::endl;
@@ -588,18 +588,20 @@ MBErrorCode get_senses(MBEntityHandle entity,
     std::cout << "=====================================" << std::endl;
 
     MBRange verts;
-    rval = MBI()->get_entities_by_type(0, MBVERTEX, verts);
-    if(gen::error(MB_SUCCESS!=result,"could not get vertex handles")) return result;
-    double x[geom_sets[0].size()];
-    double y[geom_sets[0].size()];
-    double z[geom_sets[0].size()];
+    rval = MBI()->get_entities_by_type(0, MBVERTEX, verts, true );
+    if(gen::error(MB_SUCCESS!=rval,"could not get vertex handles")) return rval;
+    double x[verts.size()];
+    double y[verts.size()];
+    double z[verts.size()];
+    std::cout << geom_sets[0].size() << std::endl;
 
+    rval = MBI()-> get_coords( verts, &x[0], &y[0], &z[0] );
+    if(gen::error(MB_SUCCESS!=rval,"could not get coordinates of the vertices")) return rval;
 
-    rval = MBI()-> get_coords( verts, &x[0], &y[0], &z[0]);
-    if(gen::error(MB_SUCCESS!=result,"could not get coordinates of the vertices")) return result;
-
-
+        
     int j=0;
+    verts.print();
+    std::cout << j << std::endl;
     for (MBRange::const_iterator i = verts.begin(); i!=verts.end(); i++)
     {
         
@@ -607,16 +609,19 @@ MBErrorCode get_senses(MBEntityHandle entity,
      std::cout << "X = " << x[j] << std::endl;
      std::cout << "Y = " << y[j] << std::endl;
      std::cout << "Z = " << z[j] << std::endl;
-
      j++;
 
    }
-
+    
     //Add groups//
+    std::cout << "=====================================" << std::endl;
+    std::cout << " Group Information " << std::endl;
+    std::cout << "=====================================" << std::endl;
+
     
     MBTag name_tag;
     result = MBI()->tag_get_handle( NAME_TAG_NAME, NAME_TAG_SIZE,
-				MB_TYPE_OPAQUE, name_tag, moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT);
+				MB_TYPE_OPAQUE, name_tag, moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT );
     if ( result != MB_SUCCESS )
       {
 	moab_printer(result);
@@ -633,20 +638,36 @@ MBErrorCode get_senses(MBEntityHandle entity,
     if(gen::error(MB_SUCCESS!=result,"could not get the name category tag handle")) return result;    
 
     MBRange group_sets;
+    // Has to be this way becaue of MOAB crazy
     char name[] = "Group\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0";
     void* val[] = {&name};
-    std::cout << "Size of name = " << sizeof(name) << std::endl;
     rval = MBI()->get_entities_by_type_and_tag( 0, MBENTITYSET, &category_tag, val, 1, group_sets );
-    if(gen::error(MB_SUCCESS!=result,"could not get the group entities")) return result;
-    group_sets.print();
+    if(gen::error(MB_SUCCESS!=rval,"could not get the group entities")) return rval;
+    //pring all group id's and names
+    
+    for(MBRange::iterator i = group_sets.begin(); i != group_sets.end(); i++)
+      {
+        //Get the group names
+	std::cout << "Group ID = " << gen::geom_id_by_handle(*i) << std::endl;
+        char group_name[NAME_TAG_SIZE+1];
+        rval = MBI()-> tag_get_data( name_tag, &*i, 1, group_name );
+        if(gen::error(MB_SUCCESS!=rval,"could not get the group names")) return rval;
+	std::cout << "Group Name = " << group_name << std::endl;
+	std::cout << "-----------------------------" << std::endl;
 
-    //print name tag of group_set 1
-    char* group_names[3];
-    rval = MBI()-> tag_get_data( name_tag, group_sets, group_names);
-    if(gen::error(MB_SUCCESS!=result,"could not get the group names")) return result;
-
-    //std::cout << "Group Name 1 = " << *group_names[0] << std::endl;
-
+        //print all entity id's for that group
+         MBRange group_ents;
+         rval = MBI()->get_entities_by_type( *i, MBENTITYSET, group_ents, false );
+         if(gen::error(MB_SUCCESS!=rval,"could not get the group entities")) return rval;
+         int counter = 1;
+         for(MBRange::iterator j = group_ents.begin(); j!=group_ents.end(); j++)
+	   {
+	     std::cout << "Group Entity " << counter << " = " << gen::geom_id_by_handle(*j)
+		       << std::endl;
+	   }
+	std::cout << "-----------------------------" << std::endl;
+      }
+    
 }
 //==========EOL=============//
 
