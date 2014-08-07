@@ -1,0 +1,25 @@
+#!/bin/bash
+
+
+
+make clean
+
+make 
+
+echo "RUNNING TEST_CYL..."
+./test_cyl
+
+make test_iter
+
+echo "RUNNING TEST_ITER..."
+./test_iter 
+
+make test_fnsf_360
+
+echo "RUNNING TEST_FNSF..."
+./test_fnsf_360
+
+make test_bllite
+
+echo "RUNNING TEST_BLLITE..."
+./test_bllite
