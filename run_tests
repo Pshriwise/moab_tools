@@ -1,6 +1,12 @@
 #!/bin/bash
 
+#copy tests from cae space (must have permission to do so)
 
+if [ ! -f mw_test_files.tar.gz ]; then
+scp cae:/userspace/c/cnerg/cnerg/users/shriwise/mw_test_files.tar.gz ./.
+fi
+
+tar xzvf mw_test_files.tar.gz
 
 make clean
 
