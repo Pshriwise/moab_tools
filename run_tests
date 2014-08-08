@@ -11,21 +11,18 @@ tar xzvf mw_test_files.tar.gz
 make clean
 
 make 
+make test_iter
+make test_fnsf_360
+make test_bllite
 
 echo "RUNNING TEST_CYL..."
 ./test_cyl
-
-make test_iter
-
+echo 
 echo "RUNNING TEST_ITER..."
 ./test_iter 
-
-make test_fnsf_360
-
+echo
 echo "RUNNING TEST_FNSF..."
 ./test_fnsf_360
-
-make test_bllite
-
+echo
 echo "RUNNING TEST_BLLITE..."
 ./test_bllite
