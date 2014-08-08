@@ -1,50 +1,32 @@
 include ${MOAB_MAKE}
+include ${MK_MAKE}
 
-INC = -I../
-MOAB_CXXFLAGS =  -Wall -pipe -pedantic -Wno-long-long ${INC}
-MOAB_CFLAGS = -Wall -pipe -pedantic -Wno-long-long ${INC}
-CXXFLAGS += ${MOAB_CXXFLAGS} -g 
+MOAB_CXXFLAGS =  -Wall -pipe -pedantic -Wno-long-long
+MOAB_CFLAGS = -Wall -pipe -pedantic -Wno-long-long
+CXXFLAGS += ${MOAB_CXXFLAGS} ${MESHKIT_CXXFLAGS} -g 
 CC = g++
 LD_FLAGS = -g
-CPPFLAGS += ${MOAB_INCLUDES} -g
-CFLAGS   += ${MOAB_CFLAGS} -g
+CPPFLAGS += ${MOAB_INCLUDES} ${MESHKIT_INCLUDES} -g
+CFLAGS   += ${MOAB_CFLAGS} ${MESHKIT_CFLAGS} -g
 # add -g -pg to both CXX and LD flags to profile
 
 all: test_cyl 
 
-gen.o: ../gen.cpp ../gen.hpp
-	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c ../gen.cpp
+test_cyl: test_cyl.o 
+	$(CC) $(LD_FLAGS) -o test_cyl test_cyl.o  \
+	${MOAB_LIBS_LINK} -ldagmc ${MESHKIT_LIBS_LINK}
 
-arc.o: ../arc.cpp ../arc.hpp
-	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c ../arc.cpp
+test_iter: test_iter.o
+	$(CC) $(LD_FLAGS) -o test_iter test_iter.o \
+	${MOAB_LIBS_LINK} -ldagmc ${MESHKIT_LIBS_LINK}
 
-zip.o: ../zip.cpp ../zip.hpp
-	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c ../zip.cpp
+test_bllite: test_bllite.o 
+	$(CC) $(LD_FLAGS) -o test_bllite test_bllite.o \
+	${MOAB_LIBS_LINK} -ldagmc ${MESHKIT_LIBS_LINK}
 
-cleanup.o: ../cleanup.cpp ../cleanup.hpp
-	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c ../cleanup.cpp
-
-cw_func.o: ../cw_func.cpp ../cw_func.hpp
-	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c ../cw_func.cpp
-
-mw_func.o: ../mw_func.cpp ../mw_func.hpp
-	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c ../mw_func.cpp
-
-test_cyl: test_cyl.o gen.o arc.o zip.o cleanup.o cw_func.o mw_func.o
-	$(CC) $(LD_FLAGS) -o test_cyl test_cyl.o gen.o arc.o zip.o cleanup.o cw_func.o  \
-	mw_func.o ${MOAB_LIBS_LINK} -ldagmc
-
-test_iter: test_iter.o gen.o arc.o zip.o cleanup.o cw_func.o mw_func.o
-	$(CC) $(LD_FLAGS) -o test_iter test_iter.o gen.o arc.o zip.o cleanup.o cw_func.o  \
-	mw_func.o ${MOAB_LIBS_LINK} -ldagmc
-
-test_bllite: test_bllite.o gen.o arc.o zip.o cleanup.o cw_func.o mw_func.o
-	$(CC) $(LD_FLAGS) -o test_bllite test_bllite.o gen.o arc.o zip.o cleanup.o cw_func.o  \
-	mw_func.o ${MOAB_LIBS_LINK} -ldagmc
-
-test_fnsf_360: test_fnsf_360.o gen.o arc.o zip.o cleanup.o cw_func.o mw_func.o
-	$(CC) $(LD_FLAGS) -o test_fnsf_360 test_fnsf_360.o gen.o arc.o zip.o cleanup.o cw_func.o  \
-	mw_func.o ${MOAB_LIBS_LINK} -ldagmc
+test_fnsf_360: test_fnsf_360.o 
+	$(CC) $(LD_FLAGS) -o test_fnsf_360 test_fnsf_360.o \
+	${MOAB_LIBS_LINK} -ldagmc ${MESHKIT_LIBS_LINK}
 
 clean:
 	rm -f make_watertight.o make_watertight gen.o arc.o zip.o \
