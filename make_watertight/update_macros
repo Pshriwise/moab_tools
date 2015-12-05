@@ -1,0 +1,24 @@
+(fset 'headers
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 up up down down 34 77 66 return 34 109 111 97 98 47 return 33 escape 60 f5 34 109 111 97 98 47 84 97 103 67 111 110 118 return 34 77 66 84 97 103 86 111 110 backspace backspace backspace 67 111 110 118 return 33 24 19] 0 "%d")) arg)))
+(fset 'errcode
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([f5 77 66 69 82 82 79 82 backspace backspace backspace backspace backspace 69 114 114 111 114 67 111 100 101 return 109 111 97 98 58 58 69 114 114 111 114 67 111 100 101 return 33 24 19] 0 "%d")) arg)))
+(fset 'types
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([f5 77 66 82 97 110 103 101 return 109 111 97 98 58 58 82 97 110 103 101 return 33 escape 60 f5 77 66 69 110 116 105 116 121 72 97 110 100 108 101 return 77 66 backspace backspace 109 111 97 98 58 58 69 110 116 105 116 121 72 65 110 100 108 101 backspace backspace backspace backspace backspace 97 110 100 108 101 return 33 escape 60 24 19] 0 "%d")) arg)))
+(fset 'tags
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([f5 77 66 84 97 103 return 109 111 97 98 58 58 84 97 103 return 33 24 19] 0 "%d")) arg)))
+(fset 'mbs
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 77 66 95 return 109 111 97 98 58 58 77 66 95 return 33] 0 "%d")) arg)))
+(fset 'entsets
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 77 66 69 78 84 73 84 89 83 69 84 return 109 111 97 98 58 58 77 66 69 78 84 73 84 89 83 69 84 return 33] 0 "%d")) arg)))
+(fset 'cartvect
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 77 66 67 97 114 116 86 101 99 116 return 109 111 98 97 backspace backspace backspace backspace 109 111 97 98 58 58 67 97 114 116 86 101 99 116 return 33] 0 "%d")) arg)))
+(fset 'meshsetopts
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 77 69 83 72 83 69 84 return 109 111 97 98 58 58 77 69 83 72 83 69 84 return 33] 0 "%d")) arg)))
+(fset 'edgetri
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 77 66 84 82 73 return 109 111 97 98 58 58 77 66 84 82 73 return 33 escape 60 f5 77 66 69 68 71 69 return 109 111 97 98 103 S-backspace 58 58 77 66 69 68 71 69 return 33 24 19] 0 "%d")) arg)))
+(fset 'interface
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 77 66 73 110 116 101 114 102 97 99 101 return 109 111 97 98 58 58 73 110 116 101 114 102 97 99 101 return 33] 0 "%d")) arg)))
+(fset 'rvals
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([f5 77 66 95 83 85 67 67 69 83 83 return 109 111 97 98 58 58 77 66 95 67 85 S-backspace S-backspace 83 73 85 67 S-backspace S-backspace S-backspace 85 67 67 69 83 83 return 33 escape 60 f5 77 66 95 70 65 73 76 85 82 69 return 109 111 97 98 58 58 77 66 95 70 65 73 76 85 82 69 return 33] 0 "%d")) arg)))
+(fset 'oops
+   (lambda (&optional arg) "Keyboard macro." (interactive "p") (kmacro-exec-ring-item (quote ([escape 60 f5 109 111 97 103 backspace backspace backspace backspace 109 111 97 98 58 58 109 111 97 98 58 58 return 109 111 97 98 58 58 return 33] 0 "%d")) arg)))
