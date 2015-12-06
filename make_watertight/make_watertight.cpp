@@ -152,7 +152,7 @@ moab::ErrorCode write_sealed_file( std::string root_filename, double facet_tol, 
     // result = MBI()->write_mesh( filename_new.c_str(), &input_meshset, 1);
     result = MBI()->write_mesh( output_filename.c_str() );
     if (moab::MB_SUCCESS != result) std::cout << "result= " << result << std::endl;
-    assert(moab::MB_SUCCESS == result);  
+    MB_CHK_SET_ERR(result, "");  
 
   return result; 
 }

@@ -49,10 +49,10 @@ moab::ErrorCode delete_all_edges() {
   moab::Range edges;
   result = MBI()->get_entities_by_type( 0, moab::MBEDGE, edges );
   if(gen::error(moab::MB_SUCCESS!=result,"could not get edges")) return result;
-  assert(moab::MB_SUCCESS == result);
+  MB_CHK_SET_ERR(result, "");
   result = MBI()->delete_entities( edges );
   if(gen::error(moab::MB_SUCCESS!=result,"could not delete edges")) return result;
-  assert(moab::MB_SUCCESS == result);
+  MB_CHK_SET_ERR(result, "");
   return moab::MB_SUCCESS;
 }
 
@@ -61,13 +61,13 @@ moab::ErrorCode find_degenerate_tris() {
   moab::Range tris;
   result = MBI()->get_entities_by_type( 0, moab::MBTRI, tris );
   if(gen::error(moab::MB_SUCCESS!=result,"could not get tris")) return result;
-  assert(moab::MB_SUCCESS == result);
+  MB_CHK_SET_ERR(result, "");
   int counter = 0;
   for(moab::Range::const_iterator i=tris.begin(); i!=tris.end(); ++i) {
     if( gen::triangle_degenerate(*i) ) {
       result = MBI()->list_entity(*i);
       if(gen::error(moab::MB_SUCCESS!=result,"found degenerate tri")) return result;
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       ++counter;
     }
   }
@@ -987,20 +987,20 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
 	int surf_id;
 	result = MBI()->tag_get_data( id_tag, &(*i), 1, &surf_id );
 	if(gen::error(moab::MB_SUCCESS!=result,"could not get id tag")) return result;
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 	if(debug) std::cout << "  surf id= " << surf_id << std::endl;
 
 	// get the 2D entities in the surface set
 	moab::Range dim2_ents;
 	result = MBI()->get_entities_by_dimension( *i, 2, dim2_ents );
 	if(gen::error(moab::MB_SUCCESS!=result,"could not get 3D entities")) return result;
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 
 	// get facets of the surface meshset
 	moab::Range tris;
 	result = MBI()->get_entities_by_type( *i, moab::MBTRI, tris );
 	if(gen::error(moab::MB_SUCCESS!=result,"could not get tris")) return result;
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 
         // Remove any 2D entities that are not triangles. This is needed because
         // ReadCGM will add quads and polygons to the surface set. This code only
@@ -1009,7 +1009,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
         if(!not_tris.empty()) {
         result = MBI()->delete_entities( not_tris );
         if(gen::error(moab::MB_SUCCESS!=result,"could not delete not_tris")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         std::cout << "  removed " << not_tris.size() 
                   << " 2D elements that were not triangles from surface " 
                   << surf_id << std::endl;
@@ -1040,13 +1040,13 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
         // the tri became inverted.
         result = gen::save_normals( tris, normal_tag );
         if(gen::error(moab::MB_SUCCESS!=result,"could not save_normals")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
   
         // Check if edges exist
         int n_edges;
         result = MBI()->get_number_entities_by_type(0, moab::MBEDGE, n_edges );
         if(gen::error(moab::MB_SUCCESS!=result,"could not get number of edges")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         if(gen::error(0!=n_edges,"edges exist")) return result;
         assert(0 == n_edges); //*** Why can't we have edges? (Also, this assertion is never used)
 
@@ -1060,7 +1060,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
         // to keep from altering the data set when checking. 
         result = tool.find_skin( 0, tris, 1, skin_edges, false);
         if(gen::error(moab::MB_SUCCESS!=result,"could not find_skin")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
      
 
         // merge the vertices of the skin
@@ -1113,27 +1113,27 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
       // get the surf id of the surface meshset
       int surf_id;
       result = MBI()->tag_get_data( id_tag, &(*i), 1, &surf_id );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       if(debug) std::cout << "fix_normals surf id=" << surf_id << std::endl;
 
       // get facets from the surface meshset
       moab::Range tris;
       result = MBI()->get_entities_by_type( *i, moab::MBTRI, tris );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       // get the normals, pre zipping
       std::vector<moab::CartVect> old_normals(tris.size()), new_normals(tris.size());
       result = MBI()->tag_get_data( normal_tag, tris, &old_normals[0]);
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       // get the normals, post zipping
       result = gen::triangle_normals( tris, new_normals );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       // test the normals, finding the inverted tris
       std::vector<int> inverted_tri_indices;
       result = zip::test_normals( old_normals, new_normals, inverted_tri_indices);
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       // insert the inverted tris into a range
       moab::Range inverted_tris;
@@ -1145,7 +1145,7 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
       // do edges exist?
       int n_edges;
       result = MBI()->get_number_entities_by_type( 0, moab::MBEDGE, n_edges );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       assert(0 == n_edges); // *** Why can't we have edges?
   
       // fix the inverted tris
@@ -1156,7 +1156,7 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
 
       // if fix_normals exits on an error, we still need to remove its edges
       result = delete_all_edges();
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
     }
     if(verbose)
     {
@@ -1172,7 +1172,7 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
       // get the ordered verts
       std::vector<moab::EntityHandle> ordered_verts;
       result = arc::get_meshset( *i, ordered_verts );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
       if(moab::MB_SUCCESS != result) return result;
 
       // Check for duplicate verts. This should not happen, but could if line
@@ -1207,7 +1207,7 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
       // get geometric endpoint sets of the curve (may be stale)
       moab::Range endpt_sets;
       result = MBI()->get_child_meshsets( *i, endpt_sets );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
       if(moab::MB_SUCCESS != result) return result;
 
       // do the correct number of endpt sets exist?
@@ -1223,7 +1223,7 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
         moab::Range endpt_vert;
         result = MBI()->get_entities_by_handle( *j, endpt_vert );
         if(moab::MB_SUCCESS != result) return result;
-        assert(moab::MB_SUCCESS==result);
+        MB_CHK_SET_ERR(result, "");
         if(1 != endpt_vert.size()) {
 	  std::cout << "curve " << gen::geom_id_by_handle(*i) 
                     << " has" << endpt_vert.size() 
@@ -1242,7 +1242,7 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
       for(unsigned int j=0; j<ordered_verts.size()-1; ++j) {
         moab::EntityHandle edge;
         result = MBI()->create_element( moab::MBEDGE, &ordered_verts[j], 2, edge );
-        assert(moab::MB_SUCCESS==result);
+        MB_CHK_SET_ERR(result, "");
         if(moab::MB_SUCCESS != result) return result;
         ordered_edges[j] = edge;
       }
@@ -1252,15 +1252,15 @@ moab::ErrorCode fix_normals(moab::Range surface_sets, moab::Tag id_tag, moab::Ta
 
       // clear the set
       result = MBI()->clear_meshset( &(*i), 1 );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
       if(moab::MB_SUCCESS != result) return result;
 
       // add the verts then edges to the curve set
       result = MBI()->add_entities( *i, &ordered_verts[0], ordered_verts.size() );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
       if(moab::MB_SUCCESS != result) return result;
       result = MBI()->add_entities( *i, &ordered_edges[0], ordered_edges.size() );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
       if(moab::MB_SUCCESS != result) return result;
     }
     return moab::MB_SUCCESS;
@@ -1443,7 +1443,7 @@ moab::ErrorCode delete_merged_curves( moab::Range &existing_curve_sets, moab::Ta
    moab::Range curves_to_delete;
     result = MBI()->get_entities_by_type_and_tag(0, moab::MBENTITYSET, &merge_tag, NULL,
                                                  1, curves_to_delete);
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     // loop over the curves to delete 
     for(moab::Range::const_iterator i=curves_to_delete.begin(); i!=curves_to_delete.end(); ++i) {
       // get the curve_to_keep
@@ -1463,7 +1463,7 @@ moab::ErrorCode delete_merged_curves( moab::Range &existing_curve_sets, moab::Ta
       }
     }
     result = MBI()->delete_entities( curves_to_delete );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     if ( result != moab::MB_SUCCESS ) 
       {
 	std::cout << "Houston, we have a problem" << std::endl;
@@ -1502,7 +1502,7 @@ moab::ErrorCode get_unmerged_curves( moab::EntityHandle surface, std::vector<moa
 
    result = MBI()->get_child_meshsets( surface, curves );
       if(gen::error(moab::MB_SUCCESS!=result,"could not get child sets")) return result;
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
 
       // Update the curve_sets with that contain entity_to_delete curves with their
       // entity_to_keep curves. Unmerged_curve_sets will end up holding the curves
@@ -1560,7 +1560,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
 		  << surf_id << std::endl;  
         result = MBI()->delete_entities(skin_edges);
         if(gen::error(moab::MB_SUCCESS!=result,"could not delete skin edges")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         cont = true;
 	return result;
       }  
@@ -1575,7 +1575,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
 	moab::Range adj_tris;
 	result = MBI()->get_adjacencies( &(*j), 1, 2, false, adj_tris );
         if(gen::error(moab::MB_SUCCESS!=result,"could not get adj tris")) return result;
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 	moab::Range skin_tri = intersect( adj_tris, tris );
         if(1 != skin_tri.size()) {
           std::cout << "skin_tri.size()=" << skin_tri.size() << std::endl;
@@ -1584,7 +1584,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
         }
 	result = arc::orient_edge_with_tri( *j, skin_tri.front() );
         if(gen::error(moab::MB_SUCCESS!=result,"could not orient_edge_with_tri")) return result;
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
       }
       // I NEED TO ADD BETTER CLEANUP AFTER THESE FAILURE CONDITIONS
       if(catch_error) {
@@ -1592,7 +1592,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
                   << std::endl;  
         result = MBI()->delete_entities(skin_edges);
         if(gen::error(moab::MB_SUCCESS!=result,"could not delete skin edges")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         cont = true;
         return result;
       }
@@ -1606,7 +1606,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
 	std::cout << "  surface " << surf_id << " failed to zip: could not create loops" 
 		  << std::endl;
         result = MBI()->delete_entities(skin_edges);
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
 	cont = true;
         return result;
       }
@@ -1616,7 +1616,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
       std::vector< std::vector<moab::EntityHandle> > skin_temp(skin_loops_of_edges.size());
       for(unsigned int j=0; j<skin_loops_of_edges.size(); j++) {
         result = gen::ordered_verts_from_ordered_edges( skin_loops_of_edges[j], skin_temp[j] );
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
 	// check to make sure that the loop is closed
 	assert(skin_temp[j].front() == skin_temp[j].back());
       }
@@ -1626,7 +1626,7 @@ moab::ErrorCode create_skin_vert_loops( moab::Range &skin_edges, moab::Range tri
       // edges are no longer needed       
       result = MBI()->delete_entities(skin_edges);
       if(gen::error(moab::MB_SUCCESS!=result,"could not delete skin_edges")) return result;
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       
 
@@ -1641,14 +1641,14 @@ moab::ErrorCode merge_skin_verts ( moab::Range &skin_verts, moab::Range &skin_ed
     result = MBI()->get_adjacencies( skin_edges, 0, false, skin_verts, 
                                        moab::Interface::UNION );
         if(gen::error(moab::MB_SUCCESS!=result,"could not get adj verts")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         result = gen::merge_vertices( skin_verts, SME_RESABS_TOL );         
         if (moab::MB_SUCCESS != result) {                                             
 	if(debug) std::cout << "result= " << result << std::endl;                  
 	std::cout << "  surface " << surf_id << " failed to zip: could not merge vertices"   
 		  << surf_id << std::endl;  
         result = MBI()->delete_entities(skin_edges);
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
 	cont = true;
         return result;
         }  
@@ -1660,7 +1660,7 @@ moab::ErrorCode merge_skin_verts ( moab::Range &skin_verts, moab::Range &skin_ed
                   << " failed to zip: could not remove degenerate edges" << std::endl;
         result = MBI()->delete_entities(skin_edges);
         if(gen::error(moab::MB_SUCCESS!=result,"could not delete skin edges")) return result;
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
 	cont = true;
         return result;
         }  
@@ -1769,7 +1769,7 @@ moab::ErrorCode make_mesh_watertight(moab::EntityHandle input_set, double &facet
     // Get entity count before sealing.
     int orig_n_tris;
     result = MBI()->get_number_entities_by_type( 0, moab::MBTRI, orig_n_tris );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
 
     if(verbose)
     {
@@ -1815,7 +1815,7 @@ moab::ErrorCode make_mesh_watertight(moab::EntityHandle input_set, double &facet
     // This function is still screwed up, but 99% right.
     if (verbose) std::cout << "Fixing inverted triangles..." << std::endl;
     result = fix_normals(geom_sets[2], id_tag, normal_tag, debug, verbose);
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
 
    
     // As sanity check, did zipping drastically change the entity's size?
@@ -1838,12 +1838,12 @@ moab::ErrorCode make_mesh_watertight(moab::EntityHandle input_set, double &facet
     for(moab::Range::iterator i=geom_sets[3].begin(); i!=geom_sets[3].end(); ++i) {
       int n_surfs;
       result = MBI()->num_child_meshsets( *i, &n_surfs );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       if(0 == n_surfs) {
         // Remove the volume set. This also removes parent-child relationships.
 	std::cout << "  deleted volume " << gen::geom_id_by_handle(*i)  << std::endl;
         result = MBI()->delete_entities( &(*i), 1);
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         i = geom_sets[3].erase(i) - 1;
       } 
     }
@@ -1857,7 +1857,7 @@ moab::ErrorCode make_mesh_watertight(moab::EntityHandle input_set, double &facet
     // which doesn't actually occur any more
     //if (verbose) std::cout << "Removing stale OBB trees..." << std::endl;
     //result = cleanup::remove_obb_tree();
-    //assert(moab::MB_SUCCESS == result);
+    //MB_CHK_SET_ERR(result, "");
 
     //std::cout << "INSERT FUNCTION HERE TO REMOVE STALE VERTS, EDGES, TRIS, VERT SETS, ETC"
     //        << std::endl;
@@ -1879,7 +1879,7 @@ moab::ErrorCode make_mesh_watertight(moab::EntityHandle input_set, double &facet
     // Print new size of the file to the user
     int sealed_n_tris;
     result = MBI()->get_number_entities_by_type( 0, moab::MBTRI, sealed_n_tris );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     if (verbose)
     {
     std::cout << "  output file contains " << geom_sets[3].size() << " volumes, " 

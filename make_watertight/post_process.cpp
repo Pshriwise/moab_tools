@@ -47,9 +47,9 @@ moab::ErrorCode delete_all_edges() {
   moab::ErrorCode result;
   moab::Range edges;
   result = MBI()->get_entities_by_type( 0, moab::MBEDGE, edges );
-  assert(moab::MB_SUCCESS == result);
+  MB_CHK_SET_ERR(result, "");
   result = MBI()->delete_entities( edges );
-  assert(moab::MB_SUCCESS == result);
+  MB_CHK_SET_ERR(result, "");
   return moab::MB_SUCCESS;
 }
 
@@ -65,13 +65,13 @@ moab::ErrorCode prepare_curves(moab::Range &curve_sets,
     // get the curve id of the curve meshset
     int id;
     result = MBI()->tag_get_data( id_tag, &(*i), 1, &id );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     std::cout << "curve " << id << std::endl;
 
     // get the range of edges of the curve meshset
     std::vector<moab::EntityHandle> curve_edges;
     result = MBI()->get_entities_by_type( *i, moab::MBEDGE, curve_edges );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
 
     /* Merge the endpoints of the curve and remove its edges if it is too small.
     Use the MERGE_TOL because these edges will be merged with the MERGE_TOL 
@@ -84,7 +84,7 @@ moab::ErrorCode prepare_curves(moab::Range &curve_sets,
       // get the endpoints of the curve
       moab::Range endpt_sets;
       result = MBI()->get_child_meshsets( *i, endpt_sets );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
       std::cout << "  endpt_sets.size()=" << endpt_sets.size() << std::endl;
       if(endpt_sets.empty()) {
         assert(false);
@@ -93,28 +93,28 @@ moab::ErrorCode prepare_curves(moab::Range &curve_sets,
       } else if(2 == endpt_sets.size()) {
         moab::Range front_endpt, back_endpt;
         result = MBI()->get_entities_by_type( endpt_sets.front(), moab::MBVERTEX, front_endpt);
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         assert(1 == front_endpt.size());
         result = MBI()->get_entities_by_type( endpt_sets.back(), moab::MBVERTEX, back_endpt);
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         assert(1 == back_endpt.size());
         // merge the endpoints-ALWAYS CHECK TO AVOID MERGING THE SAME ENTITY!!!
         if(front_endpt[0] != back_endpt[0]) {
           result = MBI()->merge_entities( front_endpt[0], back_endpt[0], false, true);
-          assert(moab::MB_SUCCESS == result);
+          MB_CHK_SET_ERR(result, "");
           // check for and remove degenerate edges caused by the merge
           moab::Range edges;
           moab::EntityHandle temp = front_endpt[0];
           result = MBI()->get_adjacencies( &temp, 1, 1, false, edges);
-          assert(moab::MB_SUCCESS == result);
+          MB_CHK_SET_ERR(result, "");
           for(moab::Range::iterator j=edges.begin(); j!=edges.end(); j++) {
             const moab::EntityHandle *conn;
             int n_verts;
             result = MBI()->get_connectivity( *j, conn, n_verts); 
-            assert(moab::MB_SUCCESS == result);
+            MB_CHK_SET_ERR(result, "");
             if(conn[0] == conn[1]) {
               result = MBI()->delete_entities( &(*j), 1 );
-              assert(moab::MB_SUCCESS == result);
+              MB_CHK_SET_ERR(result, "");
             }
           }
 	}
@@ -126,7 +126,7 @@ moab::ErrorCode prepare_curves(moab::Range &curve_sets,
       
       // Remove the curve set. This also removes parent-child relationships.
       result = MBI()->delete_entities( &(*i), 1);
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       i = curve_sets.erase(i) - 1;
       continue;
     }
@@ -134,15 +134,15 @@ moab::ErrorCode prepare_curves(moab::Range &curve_sets,
     // convert the curve of edges into a curve of verts 
     std::vector<moab::EntityHandle> ordered_verts;
     result = gen::ordered_verts_from_ordered_edges( curve_edges, ordered_verts);
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
 
     // the edges are no longer needed
     result = MBI()->delete_entities( &curve_edges[0], curve_edges.size() );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
 
     // replace the unordered edges with the ordered verts
     result = arc::set_meshset( *i, ordered_verts );
-    assert(moab::MB_SUCCESS == result);      
+    MB_CHK_SET_ERR(result, "");      
   }
 
   return moab::MB_SUCCESS;
@@ -180,18 +180,18 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
       // get the surf id of the surface meshset
       int surf_id;
       result = MBI()->tag_get_data( id_tag, &(*i), 1, &surf_id );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       std::cout << "  surf id=" << surf_id << std::endl;
 
       // get facets of the surface meshset
       moab::Range tris;
       result = MBI()->get_entities_by_type( *i, moab::MBTRI, tris );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       // Get the curves sets
       std::vector<moab::EntityHandle> curve_sets, unmerged_curve_sets;
       result = MBI()->get_child_meshsets( *i, curve_sets );
-      assert(moab::MB_SUCCESS==result);
+      MB_CHK_SET_ERR(result, "");
 
       // Update the curve_sets with that contain entity_to_delete curves with their
       // entity_to_keep curves. Unmerged_curve_sets will end up holding the curves
@@ -228,13 +228,13 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
       // If all of the curves are merged, remove the surfaces facets.
       if(unmerged_curve_sets.empty()) {
         result = MBI()->remove_entities( *i, tris);                                           
-	assert(moab::MB_SUCCESS == result);                                                         
+	MB_CHK_SET_ERR(result, "");                                                         
 	std::cout << "  removed " << tris.size() << " facets and deleted surface" << std::endl;
 	result = MBI()->delete_entities( tris );                                              
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
         // remove the surface set itself
         result = MBI()->delete_entities( &(*i), 1);
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
         i = surface_sets.erase(i) - 1;
         continue;
       }
@@ -245,7 +245,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
       // Save the normals of the facets. These will later be used to determine if
       // the tri became inverted.
       result = gen::save_normals( tris, normal_tag );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
   
       // get the range of skin edges from the range of facets
       moab::Skinner tool(MBI());
@@ -258,7 +258,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
       moab::Range skin_verts;
       result = MBI()->get_adjacencies( skin_edges, 0, false, skin_verts, 
                                        moab::Interface::UNION );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       result = gen::merge_vertices( skin_verts, SME_RESABS_TOL );         
       if (moab::MB_SUCCESS != result) {                                             
 	std::cout << "result= " << result << std::endl;                  
@@ -281,21 +281,21 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
       std::vector< std::vector<moab::EntityHandle> > skin(skin_loops_of_edges.size());
       for(unsigned int j=0; j<skin_loops_of_edges.size(); j++) {
         result = gen::ordered_verts_from_ordered_edges( skin_loops_of_edges[j], skin[j] );
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
 	// check to make sure that the loop is closed
 	assert(skin[j].front() == skin[j].back());
       }
 
       // edges are no longer needed       
       result = delete_all_edges();
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
 
       /* Get the curves that are part of the surface. Use vectors to store all curve
 	 stuff so that we can remove curves from the set as they are zipped. */
       //curve_sets.clear();
 
       //result = MBI()->get_child_meshsets( *i, curve_sets );
-      //assert(moab::MB_SUCCESS==result);
+      //MB_CHK_SET_ERR(result, "");
       std::vector<int> curve_ids;
       int curve_id;
       std::vector<std::vector<moab::EntityHandle> > curves;
@@ -316,12 +316,12 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
 	// do not add a curve if it contains nothing
 	//temp = curve_sets[j];
 	result = MBI()->tag_get_data( id_tag, &(*j), 1, &curve_id );
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 	std::cout << "  curve_id=" << curve_id << " handle=" << *j << std::endl;
 	curve_ids.push_back(curve_id);
 	std::vector<moab::EntityHandle> curve;
 	result = arc::get_meshset( *j, curve );
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 	curves.push_back( curve );
       }
 
@@ -345,7 +345,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
     moab::ErrorCode result;
     moab::Range edges;
     result = MBI()->get_entities_by_dimension( 0, 1, edges );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     MBI()->list_entities( edges );
     return moab::MB_SUCCESS;
   }
@@ -375,10 +375,10 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
     // load the input file
     moab::EntityHandle input_meshset;
     result = MBI()->create_meshset( moab::MESHSET_SET, input_meshset );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     if(std::string::npos != input_name.find("h5m")) {
       result = MBI()->load_file( input_name.c_str(), &input_meshset );
-      assert( moab::MB_SUCCESS == result );
+      MB_CHK_SET_ERR(result, "");
     } else {
       std::cout << "invalid input file: must be h5m" << std::endl;
       return 1;
@@ -388,19 +388,19 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
     moab::Tag geom_tag, id_tag, sense_tag, normal_tag, merge_tag;
     result = MBI()->tag_get_handle( GEOM_DIMENSION_TAG_NAME, sizeof(int), 
 				moab::MB_TYPE_INTEGER, geom_tag, moab::MB_TAG_DENSE, 0, 0 );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     result = MBI()->tag_get_handle( GLOBAL_ID_TAG_NAME, sizeof(int), 
 				moab::MB_TYPE_INTEGER, id_tag,moab::MB_TAG_DENSE, 0, 0 );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     result = MBI()->tag_get_handle( "GEOM_SENSE_2", 2*sizeof(moab::EntityHandle), 
                                 moab::MB_TYPE_HANDLE, sense_tag, moab::MB_TAG_DENSE, 0, 0 );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     result = MBI()->tag_get_handle( "NORMAL", sizeof(moab::CartVect), 
                                 moab::MB_TYPE_OPAQUE, normal_tag, moab::MB_TAG_DENSE, 0, 0 );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     result = MBI()->tag_get_handle( "MERGE", sizeof(moab::EntityHandle), 
                                 moab::MB_TYPE_HANDLE, merge_tag, moab::MB_TAG_SPARSE, 0, 0 );
-    assert( moab::MB_SUCCESS == result );  
+    MB_CHK_SET_ERR(result, "");  
 
     // get all geometry sets
     moab::Range geom_sets[4];
@@ -408,24 +408,24 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
       void *val[] = {&dim};
       result = MBI()->get_entities_by_type_and_tag( 0, moab::MBENTITYSET, &geom_tag,
 	  					    val, 1, geom_sets[dim] );
-      assert(moab::MB_SUCCESS == result);
+      MB_CHK_SET_ERR(result, "");
       // make sure that sets TRACK membership and curves are ordered
       // moab::MESHSET_TRACK_OWNER=0x1, moab::MESHSET_SET=0x2, moab::MESHSET_ORDERED=0x4
       for(moab::Range::iterator i=geom_sets[dim].begin(); i!=geom_sets[dim].end(); i++) {
         unsigned int options;
         result = MBI()->get_meshset_options(*i, options );
-        assert(moab::MB_SUCCESS == result);
+        MB_CHK_SET_ERR(result, "");
     
         // if options are wrong change them
         if(dim==1) {
           if( !(moab::MESHSET_TRACK_OWNER&options) || !(moab::MESHSET_ORDERED&options) ) {
 	    result = MBI()->set_meshset_options(*i, moab::MESHSET_TRACK_OWNER|moab::MESHSET_ORDERED);
-            assert(moab::MB_SUCCESS == result);
+            MB_CHK_SET_ERR(result, "");
           }
         } else {
           if( !(moab::MESHSET_TRACK_OWNER&options) ) {        
 	    result = MBI()->set_meshset_options(*i, moab::MESHSET_TRACK_OWNER);
-            assert(moab::MB_SUCCESS == result);
+            MB_CHK_SET_ERR(result, "");
           }
         }
       }
@@ -435,7 +435,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
               << geom_sets[1].size() << " curves" << std::endl;  
 
     result = cleanup::delete_small_edges(geom_sets[2], MERGE_TOL);
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
   
     std::string output_filename = root_name + "_tri.h5m";
     // PROBLEM: If I write the input meshset the writer returns moab::MB_FAILURE.
@@ -443,7 +443,7 @@ moab::ErrorCode prepare_surfaces(moab::Range &surface_sets,
     // result = MBI()->write_mesh( filename_new.c_str(), &input_meshset, 1);
     result = MBI()->write_mesh( output_filename.c_str() );
     if (moab::MB_SUCCESS != result) std::cout << "result= " << result << std::endl;
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
 
     zip_time = clock();
     std::cout << "zipping took " << (double) (zip_time-prep_time)/CLOCKS_PER_SEC 

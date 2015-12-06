@@ -336,49 +336,49 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
   
     result = MBI()->tag_get_handle( GEOM_DIMENSION_TAG_NAME, 1,
 				moab::MB_TYPE_INTEGER, geom_tag, moab::MB_TAG_DENSE|moab::MB_TAG_CREAT );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
       }
     result = MBI()->tag_get_handle( GLOBAL_ID_TAG_NAME, 1,
 				moab::MB_TYPE_INTEGER, id_tag, moab::MB_TAG_DENSE|moab::MB_TAG_CREAT);
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
       }
     result = MBI()->tag_get_handle( "NORMAL", sizeof(moab::CartVect), moab::MB_TYPE_OPAQUE,
         normal_tag, moab::MB_TAG_DENSE|moab::MB_TAG_CREAT);
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
       }
     result = MBI()->tag_get_handle( "MERGE", 1, moab::MB_TYPE_HANDLE,
         merge_tag, moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT );
-    assert( moab::MB_SUCCESS == result ); 
+    MB_CHK_SET_ERR(result, ""); 
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
       } 
     result = MBI()->tag_get_handle( "FACETING_TOL", 1, moab::MB_TYPE_DOUBLE,
         faceting_tol_tag , moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT );
-    assert( moab::MB_SUCCESS == result );  
+    MB_CHK_SET_ERR(result, "");  
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
       }
     result = MBI()->tag_get_handle( "GEOMETRY_RESABS", 1,     moab::MB_TYPE_DOUBLE,
                              geometry_resabs_tag, moab::MB_TAG_SPARSE|moab::MB_TAG_CREAT  );
-    assert( moab::MB_SUCCESS == result );  
+    MB_CHK_SET_ERR(result, "");  
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
       }
     result = MBI()->tag_get_handle( "GEOM_SIZE", 1, moab::MB_TYPE_DOUBLE,
 				    size_tag, moab::MB_TAG_DENSE|moab::MB_TAG_CREAT  );
-    assert( (moab::MB_SUCCESS == result) );
+    MB_CHK_SET_ERR(result, "");
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
@@ -386,7 +386,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
     int true_int = 1;    
     result = MBI()->tag_get_handle( "ORIG_CURVE", 1,
 				moab::MB_TYPE_INTEGER, orig_curve_tag, moab::MB_TAG_DENSE|moab::MB_TAG_CREAT, &true_int );
-    assert( moab::MB_SUCCESS == result );
+    MB_CHK_SET_ERR(result, "");
     if ( result != moab::MB_SUCCESS )
       {
 	moab_printer(result);
@@ -412,7 +412,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
     double facet_tol, sme_resabs_tol=1e-6;
     result = MBI()->tag_get_data( faceting_tol_tag, &file_set.front(), 1,  
                                   &facet_tol );
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
     result = MBI()->tag_get_data( geometry_resabs_tag, &file_set.front(), 1,  
                                   &sme_resabs_tol );
     if(moab::MB_SUCCESS != result) 
@@ -441,7 +441,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
 	  					    val, 1, geom_sets[dim] );
 	std::cout << "Get entities by type and tag" << std::endl;
 
-	assert(moab::MB_SUCCESS == result);
+	MB_CHK_SET_ERR(result, "");
 
 	// make sure that sets TRACK membership and curves are ordered
 	// moab::MESHSET_TRACK_OWNER=0x1, moab::MESHSET_SET=0x2, moab::MESHSET_ORDERED=0x4
@@ -449,7 +449,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
 	  {
 	    unsigned int options;
 	    result = MBI()->get_meshset_options(*i, options );
-	    assert(moab::MB_SUCCESS == result);
+	    MB_CHK_SET_ERR(result, "");
     
 	    // if options are wrong change them
 	    if(dim==1) 
@@ -457,7 +457,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
 		if( !(moab::MESHSET_TRACK_OWNER&options) || !(moab::MESHSET_ORDERED&options) ) 
 		  {
 		    result = MBI()->set_meshset_options(*i, moab::MESHSET_TRACK_OWNER|moab::MESHSET_ORDERED);
-		    assert(moab::MB_SUCCESS == result);
+		    MB_CHK_SET_ERR(result, "");
 		  }
 	      } 
 	    else 
@@ -465,7 +465,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
 		if( !(moab::MESHSET_TRACK_OWNER&options) ) 
 		  {        
 		    result = MBI()->set_meshset_options(*i, moab::MESHSET_TRACK_OWNER);
-		    assert(moab::MB_SUCCESS == result);
+		    MB_CHK_SET_ERR(result, "");
 		  }
 	      }
 	  }
@@ -494,7 +494,7 @@ moab::ErrorCode get_senses(moab::EntityHandle entity,
     result = MBI()->get_number_entities_by_type( 0, moab::MBTRI, orig_n_tris );
     std::cout << result << std::endl;
 
-    assert(moab::MB_SUCCESS == result);
+    MB_CHK_SET_ERR(result, "");
 
     std::cout << "==================================" << std::endl;
     std::cout << "  Input faceted geometry contains: " << std::endl;
