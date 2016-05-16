@@ -9,7 +9,7 @@ CPPFLAGS += ${MOAB_INCLUDES} -g
 CFLAGS   += ${MOAB_CFLAGS} -g
 # add -g -pg to both CXX and LD flags to profile
 
-all: make_watertight post_process check_watertight fix doxy
+all: make_watertight post_process check_watertight fix doxy lib .make
 
 gen.o: gen.cpp gen.hpp
 	$(CC) $(CXXFLAGS) ${MOAB_INCLUDES} -c gen.cpp
@@ -46,6 +46,13 @@ fix: mw_fix.o gen.o arc.o zip.o cleanup.o
 	${MOAB_LIBS_LINK} -ldagmc
 doxy:
 	doxygen mw_doxydoc
+
+.make:
+	echo "MAKE_WATERTIGHT_INCLUDES=-I"${PWD} > make_watertight.make
+	echo "MAKE_WATERTIGHT_LIBS_LINK=-L"${PWD} -lMakeWatertight >> make_watertight.make
+
+lib:
+	ar rvs libMakeWatertight.so arc.o cleanup.o gen.o zip.o cw_func.o mw_func.o 
 
 clean: clean_doxygen
 	rm -f make_watertight.o make_watertight gen.o arc.o zip.o \
