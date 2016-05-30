@@ -31,19 +31,19 @@ mw_func.o: mw_func.cpp mw_func.hpp
  
 make_watertight: make_watertight.o gen.o arc.o zip.o cleanup.o mw_func.o
 	$(CC) $(LD_FLAGS) -o make_watertight make_watertight.o gen.o mw_func.o \
-	arc.o zip.o cleanup.o ${MOAB_LIBS_LINK} 
+	arc.o zip.o cleanup.o ${DAGMC_LIBS_LINK} 
 
 post_process: post_process.o gen.o arc.o zip.o cleanup.o
 	$(CC) $(LD_FLAGS) -o post_process post_process.o gen.o \
-	arc.o zip.o cleanup.o ${MOAB_LIBS_LINK} 
+	arc.o zip.o cleanup.o ${DAGMC_LIBS_LINK} 
 
 check_watertight: check_watertight.o gen.o cleanup.o cw_func.o
 	$(CC) $(LD_FLAGS) -o check_watertight check_watertight.o gen.o \
-	arc.o zip.o cleanup.o cw_func.o ${MOAB_LIBS_LINK} 
+	arc.o zip.o cleanup.o cw_func.o ${DAGMC_LIBS_LINK} 
 
 fix: mw_fix.o gen.o arc.o zip.o cleanup.o
 	$(CC) $(LD_FLAGS) -o mw_fix mw_fix.o gen.o arc.o zip.o cleanup.o  \
-	${MOAB_LIBS_LINK} -ldagmc
+	${DAGMC_LIBS_LINK}
 doxy:
 	doxygen mw_doxydoc
 
